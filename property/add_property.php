@@ -11,27 +11,32 @@ if (!isset($_SESSION['user'])) {
 }
 
 if (isset($_POST['submit'])) {
-    $owner = trim($_POST['owner']);
-    $location = trim($_POST['location']);
-    $price = (int) $_POST['price'];
-    $status = trim($_POST['status']);
-    $img = basename($_FILES['image']['name']);
-    $targetPath = '../assets/images/' . $img;
+    if (!$dbAvailable) {
+        $message = $dbError;
+        $messageClass = "alert-error";
+    } else {
+        $owner = trim($_POST['owner']);
+        $location = trim($_POST['location']);
+        $price = (int) $_POST['price'];
+        $status = trim($_POST['status']);
+        $img = basename($_FILES['image']['name']);
+        $targetPath = '../assets/images/' . $img;
 
-    if ($img && move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-        $stmt = $conn->prepare("INSERT INTO property (owner_name, location, price, status, image) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssiss", $owner, $location, $price, $status, $img);
+        if ($img && move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+            $stmt = $conn->prepare("INSERT INTO property (owner_name, location, price, status, image) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssiss", $owner, $location, $price, $status, $img);
 
-        if ($stmt->execute()) {
-            $message = "Property added successfully.";
-            $messageClass = "alert-success";
+            if ($stmt->execute()) {
+                $message = "Property added successfully.";
+                $messageClass = "alert-success";
+            } else {
+                $message = "Property upload succeeded, but the listing could not be saved.";
+                $messageClass = "alert-error";
+            }
         } else {
-            $message = "Property upload succeeded, but the listing could not be saved.";
+            $message = "Please choose a valid image file.";
             $messageClass = "alert-error";
         }
-    } else {
-        $message = "Please choose a valid image file.";
-        $messageClass = "alert-error";
     }
 }
 ?>
@@ -98,3 +103,6 @@ if (isset($_POST['submit'])) {
 </section>
 
 <?php include '../footer.php'; ?>
+</div>
+</body>
+</html>

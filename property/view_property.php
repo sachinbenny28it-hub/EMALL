@@ -1,7 +1,8 @@
 <?php
 include '../session_bootstrap.php';
 include '../db.php';
-$res = $conn->query("SELECT * FROM property ORDER BY property_id DESC");
+$res = $dbAvailable ? $conn->query("SELECT * FROM property ORDER BY property_id DESC") : false;
+$defaultImage = APP_BASE . '/assets/images/pool.jpg';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,6 +16,10 @@ $res = $conn->query("SELECT * FROM property ORDER BY property_id DESC");
 <div class="site-shell">
 <?php include '../navbar.php'; ?>
 
+<?php if (!$dbAvailable): ?>
+    <div class="alert alert-error"><?php echo htmlspecialchars($dbError); ?></div>
+<?php endif; ?>
+
 <section class="page-shell">
     <div class="page-title">
         <div>
@@ -27,9 +32,16 @@ $res = $conn->query("SELECT * FROM property ORDER BY property_id DESC");
     <div class="card-container">
         <?php if ($res && $res->num_rows > 0): ?>
             <?php while ($row = $res->fetch_assoc()): ?>
-                <?php $isSold = strtolower($row['status']) === 'sold'; ?>
+                <?php
+                $isSold = strtolower($row['status']) === 'sold';
+                $imageName = isset($row['image']) ? basename((string) $row['image']) : '';
+                $imagePath = __DIR__ . '/../assets/images/' . $imageName;
+                $imageSrc = ($imageName !== '' && is_file($imagePath))
+                    ? APP_BASE . '/assets/images/' . rawurlencode($imageName)
+                    : $defaultImage;
+                ?>
                 <article class="property-card">
-                    <img src="../assets/images/<?php echo htmlspecialchars($row['image']); ?>" alt="Property image">
+                    <img src="<?php echo htmlspecialchars($imageSrc); ?>" alt="Property image for <?php echo htmlspecialchars($row['location']); ?>">
                     <div class="card-body">
                         <div class="property-meta">
                             <span>Owner: <?php echo htmlspecialchars($row['owner_name']); ?></span>
@@ -40,7 +52,9 @@ $res = $conn->query("SELECT * FROM property ORDER BY property_id DESC");
 
                         <h3><?php echo htmlspecialchars($row['location']); ?></h3>
                         <p class="price-tag">Rs. <?php echo number_format((float) $row['price']); ?></p>
-                        <p class="muted-copy">Presented with a cleaner layout so the listing feels more like a modern product card.</p>
+                        <p class="muted-copy">
+                            <?php echo $imageSrc === $defaultImage ? 'Preview image unavailable, so a curated default cover is shown for this listing.' : 'Presented with a cleaner layout so the listing feels more like a modern product card.'; ?>
+                        </p>
 
                         <div class="card-actions">
                             <?php if ($isSold): ?>
@@ -59,3 +73,6 @@ $res = $conn->query("SELECT * FROM property ORDER BY property_id DESC");
 </section>
 
 <?php include '../footer.php'; ?>
+</div>
+</body>
+</html>

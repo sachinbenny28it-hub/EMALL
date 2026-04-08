@@ -6,28 +6,33 @@ $message = '';
 $messageClass = '';
 
 if (isset($_POST['signup'])) {
-    $user = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
-
-    $checkStmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-    $checkStmt->bind_param("ss", $user, $email);
-    $checkStmt->execute();
-    $exists = $checkStmt->get_result();
-
-    if ($exists->num_rows > 0) {
-        $message = "Username or email already exists.";
+    if (!$dbAvailable) {
+        $message = $dbError;
         $messageClass = "alert-error";
     } else {
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $user, $email, $pass);
+        $user = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-        if ($stmt->execute()) {
-            $message = "Account created successfully. You can log in now.";
-            $messageClass = "alert-success";
-        } else {
-            $message = "Something went wrong while creating the account.";
+        $checkStmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+        $checkStmt->bind_param("ss", $user, $email);
+        $checkStmt->execute();
+        $exists = $checkStmt->get_result();
+
+        if ($exists->num_rows > 0) {
+            $message = "Username or email already exists.";
             $messageClass = "alert-error";
+        } else {
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $user, $email, $pass);
+
+            if ($stmt->execute()) {
+                $message = "Account created successfully. You can log in now.";
+                $messageClass = "alert-success";
+            } else {
+                $message = "Something went wrong while creating the account.";
+                $messageClass = "alert-error";
+            }
         }
     }
 }
@@ -86,3 +91,6 @@ if (isset($_POST['signup'])) {
 </section>
 
 <?php include 'footer.php'; ?>
+</div>
+</body>
+</html>

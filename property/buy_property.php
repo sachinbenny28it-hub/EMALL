@@ -7,6 +7,11 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+if (!$dbAvailable) {
+    header("Location: view_property.php");
+    exit();
+}
+
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($id > 0) {

@@ -1,9 +1,27 @@
 <?php
 include 'session_bootstrap.php';
+include 'db.php';
+
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
+
+function dashboard_count(mysqli $conn, string $query): int
+{
+    $result = $conn->query($query);
+    if (!$result) {
+        return 0;
+    }
+
+    $row = $result->fetch_row();
+    return isset($row[0]) ? (int) $row[0] : 0;
+}
+
+$listingCount = $dbAvailable ? dashboard_count($conn, "SELECT COUNT(*) FROM property") : 0;
+$availableCount = $dbAvailable ? dashboard_count($conn, "SELECT COUNT(*) FROM property WHERE LOWER(status) = 'available'") : 0;
+$soldCount = $dbAvailable ? dashboard_count($conn, "SELECT COUNT(*) FROM property WHERE LOWER(status) = 'sold'") : 0;
+$recentListings = $dbAvailable ? $conn->query("SELECT location, price, status FROM property ORDER BY property_id DESC LIMIT 3") : false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +35,10 @@ if (!isset($_SESSION['user'])) {
 <div class="site-shell">
 <?php include 'navbar.php'; ?>
 
+<?php if (!$dbAvailable): ?>
+    <div class="alert alert-error"><?php echo htmlspecialchars($dbError); ?></div>
+<?php endif; ?>
+
 <section class="dashboard-shell">
     <div class="dashboard-intro">
         <div>
@@ -28,20 +50,23 @@ if (!isset($_SESSION['user'])) {
 
     <div class="stat-grid">
         <div class="stat-card">
-            <h3>Marketplace Access</h3>
-            <p class="muted-copy">View all available properties and review current listing status.</p>
+            <span class="stat-label">Marketplace</span>
+            <h3><?php echo $listingCount; ?> Listings</h3>
+            <p class="muted-copy">Total properties currently visible across the platform.</p>
         </div>
         <div class="stat-card">
-            <h3>Seller Control</h3>
-            <p class="muted-copy">Add new property details and upload listing images from one place.</p>
+            <span class="stat-label">Available now</span>
+            <h3><?php echo $availableCount; ?> Open</h3>
+            <p class="muted-copy">Homes still open for buyers to explore and purchase.</p>
         </div>
         <div class="stat-card">
-            <h3>Account Security</h3>
-            <p class="muted-copy">Your session is protected, and logout is available whenever you need it.</p>
+            <span class="stat-label">Closed deals</span>
+            <h3><?php echo $soldCount; ?> Sold</h3>
+            <p class="muted-copy">Listings that have already moved out of the active market.</p>
         </div>
     </div>
 
-    <div class="dashboard-grid" style="margin-top: 20px;">
+    <div class="dashboard-grid dashboard-grid-gap">
         <div class="dashboard-card">
             <h3>Quick Actions</h3>
             <ul class="list-clean">
@@ -52,12 +77,24 @@ if (!isset($_SESSION['user'])) {
         </div>
 
         <div class="dashboard-card">
-            <h3>Project Summary</h3>
-            <p class="muted-copy">
-                This dashboard now gives your assignment a more complete, product-style feel instead of only showing a simple login confirmation.
-            </p>
+            <h3>Recent Listing Pulse</h3>
+            <?php if ($recentListings && $recentListings->num_rows > 0): ?>
+                <ul class="list-clean">
+                    <?php while ($row = $recentListings->fetch_assoc()): ?>
+                        <li>
+                            <strong><?php echo htmlspecialchars($row['location']); ?></strong><br>
+                            <span class="muted-copy">Rs. <?php echo number_format((float) $row['price']); ?> • <?php echo htmlspecialchars($row['status']); ?></span>
+                        </li>
+                    <?php endwhile; ?>
+                </ul>
+            <?php else: ?>
+                <p class="muted-copy">No listings have been added yet. Use the quick action panel to publish the first one.</p>
+            <?php endif; ?>
         </div>
     </div>
 </section>
 
 <?php include 'footer.php'; ?>
+</div>
+</body>
+</html>

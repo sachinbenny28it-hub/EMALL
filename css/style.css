@@ -20,7 +20,7 @@
 body {
     min-height: 100vh;
     color: var(--ink);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Trebuchet MS", "Gill Sans", sans-serif;
     background:
         radial-gradient(circle at top left, rgba(230, 201, 140, 0.7), transparent 28%),
         radial-gradient(circle at right 15%, rgba(182, 106, 44, 0.16), transparent 18%),
@@ -193,10 +193,12 @@ input[type="submit"] {
 
 .hero-copy h1,
 .page-title h1,
-.auth-box h1 {
+.auth-box h1,
+.spotlight-copy h2 {
     font-size: clamp(2.3rem, 4vw, 4.6rem);
     line-height: 0.98;
     margin-bottom: 18px;
+    font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
 .hero-copy p,
@@ -247,6 +249,10 @@ input[type="submit"] {
     gap: 18px;
 }
 
+.hero-premium {
+    padding-top: 62px;
+}
+
 .hero-image {
     min-height: 320px;
     border-radius: 28px;
@@ -270,8 +276,39 @@ input[type="submit"] {
     text-transform: uppercase;
 }
 
+.hero-showcase {
+    position: relative;
+}
+
+.showcase-strip {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.showcase-strip div {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(93, 78, 66, 0.08);
+}
+
+.showcase-strip span,
+.stat-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .section {
     padding: 24px 0 58px;
+}
+
+.section-tight {
+    padding-top: 8px;
 }
 
 .section-heading,
@@ -305,6 +342,21 @@ input[type="submit"] {
 .form-card {
     border-radius: 24px;
     padding: 24px;
+}
+
+.glass-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -20% -45% auto;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(182, 106, 44, 0.18), transparent 70%);
 }
 
 .glass-card h3,
@@ -439,6 +491,10 @@ select:focus {
     padding: 28px;
 }
 
+.dashboard-grid-gap {
+    margin-top: 20px;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
@@ -476,6 +532,12 @@ select:focus {
     color: var(--muted);
 }
 
+.footer-link {
+    text-decoration: none;
+    color: var(--brand-deep);
+    font-weight: 700;
+}
+
 .popup,
 .alert {
     width: min(var(--max-width), calc(100% - 32px));
@@ -506,10 +568,35 @@ select:focus {
     color: var(--muted);
 }
 
+.spotlight-band {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 20px;
+    padding: 30px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(255, 250, 242, 0.78), rgba(236, 224, 208, 0.8));
+    border: 1px solid rgba(93, 78, 66, 0.08);
+    box-shadow: var(--shadow);
+}
+
+.spotlight-points {
+    display: grid;
+    gap: 14px;
+}
+
+.spotlight-item {
+    padding: 18px 20px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(93, 78, 66, 0.08);
+    line-height: 1.6;
+}
+
 @media (max-width: 920px) {
     .hero,
     .auth-wrapper,
-    .dashboard-grid {
+    .dashboard-grid,
+    .spotlight-band {
         grid-template-columns: 1fr;
     }
 
@@ -531,13 +618,15 @@ select:focus {
     .auth-side,
     .auth-box,
     .dashboard-card,
-    .form-card {
+    .form-card,
+    .spotlight-band {
         padding: 24px;
         border-radius: 24px;
     }
 
     .hero-metrics,
-    .form-grid {
+    .form-grid,
+    .showcase-strip {
         grid-template-columns: 1fr;
     }
 

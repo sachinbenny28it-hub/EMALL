@@ -6,26 +6,31 @@ $message = '';
 $messageClass = '';
 
 if (isset($_POST['login'])) {
-    $user = trim($_POST['username']);
-    $pass = $_POST['password'];
-
-    $stmt = $conn->prepare("SELECT username, password FROM users WHERE username = ?");
-    $stmt->bind_param("s", $user);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($row = $result->fetch_assoc()) {
-        if (password_verify($pass, $row['password'])) {
-            $_SESSION['user'] = $row['username'];
-            header("Location: dashboard.php");
-            exit();
-        }
-
-        $message = "Incorrect password. Please try again.";
+    if (!$dbAvailable) {
+        $message = $dbError;
         $messageClass = "alert-error";
     } else {
-        $message = "No account found with that username.";
-        $messageClass = "alert-error";
+        $user = trim($_POST['username']);
+        $pass = $_POST['password'];
+
+        $stmt = $conn->prepare("SELECT username, password FROM users WHERE username = ?");
+        $stmt->bind_param("s", $user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($row = $result->fetch_assoc()) {
+            if (password_verify($pass, $row['password'])) {
+                $_SESSION['user'] = $row['username'];
+                header("Location: dashboard.php");
+                exit();
+            }
+
+            $message = "Incorrect password. Please try again.";
+            $messageClass = "alert-error";
+        } else {
+            $message = "No account found with that username.";
+            $messageClass = "alert-error";
+        }
     }
 }
 ?>
@@ -78,3 +83,6 @@ if (isset($_POST['login'])) {
 </section>
 
 <?php include 'footer.php'; ?>
+</div>
+</body>
+</html>
